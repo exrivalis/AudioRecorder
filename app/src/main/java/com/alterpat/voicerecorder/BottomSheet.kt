@@ -8,17 +8,16 @@ import android.view.ViewGroup
 import android.view.WindowManager
 import android.view.inputmethod.InputMethodManager
 import android.widget.Button
+import com.alterpat.voicerecorder.databinding.ActivityMainBinding
+import com.alterpat.voicerecorder.databinding.BottomSheetBinding
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.google.android.material.textfield.TextInputEditText
 import java.io.File
 
 
-class BottomSheet: BottomSheetDialogFragment {
+class BottomSheet : BottomSheetDialogFragment {
 
-    // Step 1 - This interface defines the type of messages I want to communicate to my owner
     interface OnClickListener {
-        // These methods are the different events and
-        // need to pass relevant arguments related to the event triggered
         fun onCancelClicked()
         fun onOkClicked(filePath: String, filename: String)
     }
@@ -26,11 +25,12 @@ class BottomSheet: BottomSheetDialogFragment {
     // Step 2 - This variable represents the listener passed in by the owning object
     // The listener must implement the events interface and passes messages up to the parent.
     private lateinit var listener: OnClickListener
+    private lateinit var binding: BottomSheetBinding
 
     private lateinit var filename: String
     private lateinit var dirPath: String
 
-    constructor(dirPath: String, filename : String, listener: OnClickListener){
+    constructor(dirPath: String, filename: String, listener: OnClickListener) {
         this.dirPath = dirPath
         this.filename = filename
         this.listener = listener
@@ -41,7 +41,8 @@ class BottomSheet: BottomSheetDialogFragment {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        var view = inflater.inflate(R.layout.bottom_sheet, container)
+        binding = BottomSheetBinding.inflate(layoutInflater)
+        var view = binding.root
         var editText = view.findViewById<TextInputEditText>(R.id.filenameInput)
 
 
@@ -61,9 +62,9 @@ class BottomSheet: BottomSheetDialogFragment {
 
             // update filename if need
             val updatedFilename = editText.text.toString()
-            if(updatedFilename != filename){
+            if (updatedFilename != filename) {
                 var newFile = File("$dirPath$updatedFilename.mp3")
-                File(dirPath+filename).renameTo(newFile)
+                File(dirPath + filename).renameTo(newFile)
             }
 
             // add entry to db
@@ -80,7 +81,7 @@ class BottomSheet: BottomSheetDialogFragment {
             // hide keyboard
             hideKeyboard(view)
             // delete file from storage
-            File(dirPath+filename).delete()
+            File(dirPath + filename).delete()
 
             // dismiss dialog
             dismiss()
@@ -95,7 +96,8 @@ class BottomSheet: BottomSheetDialogFragment {
 
     private fun showKeyboard(view: View) {
         if (view.requestFocus()) {
-            val imm = view.context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager?
+            val imm =
+                view.context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager?
             imm?.toggleSoftInput(InputMethodManager.SHOW_FORCED, 0)
         }
     }

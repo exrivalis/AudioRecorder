@@ -12,14 +12,15 @@
         android:layout_height="?actionBarSize"
         app:layout_constraintTop_toTopOf="parent"
         app:title=" ">
+
         <TextView
             android:id="@+id/tvFilename"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textSize="20sp"
-            android:gravity="center"
             android:layout_marginEnd="46dp"
-            android:text=""/>
+            android:gravity="center"
+            android:text=""
+            android:textSize="20sp" />
     </com.google.android.material.appbar.MaterialToolbar>
 
     <com.alterpat.voicerecorder.PlayerWaveformView
@@ -49,8 +50,8 @@
         android:layout_height="wrap_content"
         android:layout_marginBottom="20dp"
         android:progress="40"
-        android:thumbTint="@color/colorPrimary"
         android:progressTint="@color/colorPrimary"
+        android:thumbTint="@color/colorPrimary"
         app:layout_constraintBottom_toTopOf="@+id/constraintLayout" />
 
     <androidx.constraintlayout.widget.ConstraintLayout
