@@ -7,6 +7,7 @@ import android.view.ViewGroup
 import android.widget.CheckBox
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
+import com.alterpat.voicerecorder.databinding.ItemviewLayoutBinding
 import com.alterpat.voicerecorder.db.AudioRecord
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -17,6 +18,7 @@ class Adapter(
 ) : RecyclerView.Adapter<Adapter.ViewHolder>() {
 
     private var editMode = false
+    lateinit var binding : ItemviewLayoutBinding
 
     interface OnItemClickListener {
         fun onItemClick(position: Int)
@@ -49,8 +51,8 @@ class Adapter(
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-        val view =
-            LayoutInflater.from(parent.context).inflate(R.layout.itemview_layout, parent, false)
+        binding = ItemviewLayoutBinding.inflate(LayoutInflater.from(parent.context),parent,false)
+        val view = binding.root
         return ViewHolder(view)
     }
 

@@ -4,24 +4,21 @@ import android.Manifest
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.media.MediaRecorder
+import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
+import android.view.LayoutInflater
 import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.room.Room
+import com.alterpat.voicerecorder.databinding.ActivityMainBinding
 import com.alterpat.voicerecorder.db.AppDatabase
 import com.alterpat.voicerecorder.db.AudioRecord
 import com.alterpat.voicerecorder.tools.Timer
-import kotlinx.android.synthetic.main.activity_main.deleteBtn
-import kotlinx.android.synthetic.main.activity_main.doneBtn
-import kotlinx.android.synthetic.main.activity_main.listBtn
-import kotlinx.android.synthetic.main.activity_main.playerView
-import kotlinx.android.synthetic.main.activity_main.recordBtn
-import kotlinx.android.synthetic.main.activity_main.timerView
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import java.io.File
@@ -33,7 +30,7 @@ private const val LOG_TAG = "AudioRecordTest"
 private const val REQUEST_RECORD_AUDIO_PERMISSION = 200
 
 class MainActivity : AppCompatActivity(), BottomSheet.OnClickListener, Timer.OnTimerUpdateListener {
-
+    private lateinit var binding: ActivityMainBinding 
     private lateinit var fileName: String
     private lateinit var dirPath: String
     private var recorder: MediaRecorder? = null
@@ -50,14 +47,15 @@ class MainActivity : AppCompatActivity(), BottomSheet.OnClickListener, Timer.OnT
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
+        binding = ActivityMainBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
         // Record to the external cache directory for visibility
         ActivityCompat.requestPermissions(this, permissions, REQUEST_RECORD_AUDIO_PERMISSION)
 
         handler = Handler(Looper.myLooper()!!)
 
-        recordBtn.setOnClickListener {
+        binding.recordBtn.setOnClickListener {
 
             when {
                 onPause -> resumeRecording()
@@ -66,21 +64,21 @@ class MainActivity : AppCompatActivity(), BottomSheet.OnClickListener, Timer.OnT
             }
         }
 
-        doneBtn.setOnClickListener {
+        binding.doneBtn.setOnClickListener {
             stopRecording()
             showBottomSheet()
         }
 
-        listBtn.setOnClickListener {
+        binding.listBtn.setOnClickListener {
             startActivity(Intent(this, ListingActivity::class.java))
         }
 
-        deleteBtn.setOnClickListener {
+        binding.deleteBtn.setOnClickListener {
             stopRecording()
 
             File(dirPath + fileName).delete()
         }
-        deleteBtn.isClickable = false
+        binding.deleteBtn.isClickable = false
     }
 
     override fun onRequestPermissionsResult(
@@ -104,10 +102,10 @@ class MainActivity : AppCompatActivity(), BottomSheet.OnClickListener, Timer.OnT
             return
         }
 
-        listBtn.visibility = View.GONE
-        doneBtn.visibility = View.VISIBLE
-        deleteBtn.isClickable = true
-        deleteBtn.setImageResource(R.drawable.ic_delete_enabled)
+        binding.listBtn.visibility = View.GONE
+        binding.doneBtn.visibility = View.VISIBLE
+        binding.deleteBtn.isClickable = true
+        binding.deleteBtn.setImageResource(R.drawable.ic_delete_enabled)
 
         recording = true
         timer = Timer(this)
@@ -121,15 +119,13 @@ class MainActivity : AppCompatActivity(), BottomSheet.OnClickListener, Timer.OnT
         dirPath = "${externalCacheDir?.absolutePath}/"
         fileName = "voice_record_${date}.mp3"
 
-        recorder = MediaRecorder().apply {
+        recorder =  if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) MediaRecorder(this)
+        else MediaRecorder().apply {
             setAudioSource(MediaRecorder.AudioSource.MIC)
-            /** START COMMENT
-             * These two together enable saving file into mp3 format
-             * because android doesn't support mp3 saving explicitly **/
             setOutputFormat(MediaRecorder.OutputFormat.MPEG_4)
             setAudioEncoder(MediaRecorder.AudioEncoder.AAC)
-            /** END COMMENT **/
-
+            setAudioEncodingBitRate(96000)
+            setAudioSamplingRate(44100)
             setOutputFile(dirPath + fileName)
             try {
                 prepare()
@@ -140,7 +136,7 @@ class MainActivity : AppCompatActivity(), BottomSheet.OnClickListener, Timer.OnT
             start()
         }
 
-        recordBtn.setImageResource(R.drawable.ic_pause)
+        binding.recordBtn.setImageResource(R.drawable.ic_pause)
 
         animatePlayerView()
 
@@ -148,8 +144,8 @@ class MainActivity : AppCompatActivity(), BottomSheet.OnClickListener, Timer.OnT
 
     private fun animatePlayerView() {
         if (recording && !onPause) {
-            var amp = recorder!!.maxAmplitude
-            playerView.updateAmps(amp)
+            val amp = recorder!!.maxAmplitude
+            binding.playerView.updateAmps(amp)
 
             // write maxmap to a file for visualization in player activity
 
@@ -166,7 +162,7 @@ class MainActivity : AppCompatActivity(), BottomSheet.OnClickListener, Timer.OnT
         recorder?.apply {
             pause()
         }
-        recordBtn.setImageResource(R.drawable.ic_record)
+        binding.recordBtn.setImageResource(R.drawable.ic_record)
         timer.pause()
 
     }
@@ -176,7 +172,7 @@ class MainActivity : AppCompatActivity(), BottomSheet.OnClickListener, Timer.OnT
         recorder?.apply {
             resume()
         }
-        recordBtn.setImageResource(R.drawable.ic_pause)
+        binding.recordBtn.setImageResource(R.drawable.ic_pause)
         animatePlayerView()
         timer.start()
     }
@@ -189,24 +185,24 @@ class MainActivity : AppCompatActivity(), BottomSheet.OnClickListener, Timer.OnT
             release()
         }
         recorder = null
-        recordBtn.setImageResource(R.drawable.ic_record)
+        binding.recordBtn.setImageResource(R.drawable.ic_record)
 
-        listBtn.visibility = View.VISIBLE
-        doneBtn.visibility = View.GONE
-        deleteBtn.isClickable = false
-        deleteBtn.setImageResource(R.drawable.ic_delete_disabled)
+        binding.listBtn.visibility = View.VISIBLE
+        binding.doneBtn.visibility = View.GONE
+        binding.deleteBtn.isClickable = false
+        binding.deleteBtn.setImageResource(R.drawable.ic_delete_disabled)
 
-        playerView.reset()
+        binding.playerView.reset()
         try {
             timer.stop()
-        } catch (e: Exception) {
+        } catch (_: Exception) {
         }
 
-        timerView.text = "00:00.00"
+        binding.timerView.text = "00:00.00"
     }
 
     private fun showBottomSheet() {
-        var bottomSheet = BottomSheet(dirPath, fileName, this)
+        val bottomSheet = BottomSheet(dirPath, fileName, this)
         bottomSheet.show(supportFragmentManager, LOG_TAG)
 
     }
@@ -219,13 +215,13 @@ class MainActivity : AppCompatActivity(), BottomSheet.OnClickListener, Timer.OnT
 
     override fun onOkClicked(filePath: String, filename: String) {
         // add audio record info to database
-        var db = Room.databaseBuilder(
+        val db = Room.databaseBuilder(
             this,
             AppDatabase::class.java,
             "audioRecords"
         ).build()
 
-        var duration = timer.format().split(".")[0]
+        val duration = timer.format().split(".")[0]
         stopRecording()
 
         GlobalScope.launch {
@@ -237,7 +233,7 @@ class MainActivity : AppCompatActivity(), BottomSheet.OnClickListener, Timer.OnT
     override fun onTimerUpdate(duration: String) {
         runOnUiThread {
             if (recording)
-                timerView.text = duration
+                binding.timerView.text = duration
         }
     }
 }

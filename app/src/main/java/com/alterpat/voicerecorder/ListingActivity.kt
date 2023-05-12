@@ -13,25 +13,16 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.res.ResourcesCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.room.Room
+import com.alterpat.voicerecorder.databinding.ActivityListingBinding
 import com.alterpat.voicerecorder.db.AppDatabase
 import com.alterpat.voicerecorder.db.AudioRecord
 import com.google.android.material.bottomsheet.BottomSheetBehavior
-import kotlinx.android.synthetic.main.activity_listing.bottomSheet
-import kotlinx.android.synthetic.main.activity_listing.btnClose
-import kotlinx.android.synthetic.main.activity_listing.btnDelete
-import kotlinx.android.synthetic.main.activity_listing.btnRename
-import kotlinx.android.synthetic.main.activity_listing.btnSelectAll
-import kotlinx.android.synthetic.main.activity_listing.editorBar
-import kotlinx.android.synthetic.main.activity_listing.recyclerview
-import kotlinx.android.synthetic.main.activity_listing.searchInput
-import kotlinx.android.synthetic.main.activity_listing.toolbar
-import kotlinx.android.synthetic.main.activity_listing.tvDelete
-import kotlinx.android.synthetic.main.activity_listing.tvRename
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 
 
 class ListingActivity : AppCompatActivity(), Adapter.OnItemClickListener {
+    private lateinit var binding: ActivityListingBinding
     private lateinit var adapter: Adapter
     private lateinit var audioRecords: List<AudioRecord>
     private lateinit var db: AppDatabase
@@ -42,23 +33,24 @@ class ListingActivity : AppCompatActivity(), Adapter.OnItemClickListener {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_listing)
+        binding = ActivityListingBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
-        setSupportActionBar(toolbar)
+        setSupportActionBar(binding.toolbar)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         supportActionBar?.setDisplayShowHomeEnabled(true)
-        toolbar.setNavigationOnClickListener {
+        binding.toolbar.setNavigationOnClickListener {
             onBackPressed()
         }
 
-        bottomSheetBehavior = BottomSheetBehavior.from(bottomSheet)
+        bottomSheetBehavior = BottomSheetBehavior.from(binding.bottomSheet)
         bottomSheetBehavior.state = BottomSheetBehavior.STATE_HIDDEN
 
         audioRecords = emptyList()
         adapter = Adapter(audioRecords, this)
 
-        recyclerview.adapter = adapter
-        recyclerview.layoutManager = LinearLayoutManager(this)
+        binding.recyclerview.adapter = adapter
+        binding.recyclerview.layoutManager = LinearLayoutManager(this)
 
         db = Room.databaseBuilder(
             this,
@@ -70,7 +62,7 @@ class ListingActivity : AppCompatActivity(), Adapter.OnItemClickListener {
 
         fetchAll()
 
-        searchInput.addTextChangedListener(object : TextWatcher {
+        binding.searchInput.addTextChangedListener(object : TextWatcher {
             override fun afterTextChanged(p0: Editable?) {}
 
             override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {}
@@ -82,7 +74,7 @@ class ListingActivity : AppCompatActivity(), Adapter.OnItemClickListener {
 
         })
 
-        btnSelectAll.setOnClickListener {
+        binding.btnSelectAll.setOnClickListener {
             allSelected = !allSelected
             Log.d("ListingTag", allSelected.toString())
             audioRecords.forEach {
@@ -95,11 +87,11 @@ class ListingActivity : AppCompatActivity(), Adapter.OnItemClickListener {
             adapter.notifyDataSetChanged()
         }
 
-        btnClose.setOnClickListener {
+        binding.btnClose.setOnClickListener {
             closeEditor()
         }
 
-        btnDelete.setOnClickListener {
+        binding.btnDelete.setOnClickListener {
             closeEditor()
             var toDelete: List<AudioRecord> = audioRecords.filter { it.isChecked }
             audioRecords = audioRecords.filter { !it.isChecked }
@@ -112,7 +104,7 @@ class ListingActivity : AppCompatActivity(), Adapter.OnItemClickListener {
             }
         }
 
-        btnRename.setOnClickListener {
+        binding.btnRename.setOnClickListener {
             Toast.makeText(this, "rename clicked", Toast.LENGTH_SHORT).show()
         }
 
@@ -127,7 +119,7 @@ class ListingActivity : AppCompatActivity(), Adapter.OnItemClickListener {
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         supportActionBar?.setDisplayShowHomeEnabled(true)
         // show relative layout
-        editorBar.visibility = View.GONE
+        binding.editorBar.visibility = View.GONE
         nbSelected = 0
     }
 
@@ -150,40 +142,40 @@ class ListingActivity : AppCompatActivity(), Adapter.OnItemClickListener {
     private fun updateBottomSheet() {
         when (nbSelected) {
             0 -> {
-                btnRename.isClickable = false
-                btnRename.background =
+                binding.btnRename.isClickable = false
+                binding.btnRename.background =
                     ResourcesCompat.getDrawable(resources, R.drawable.ic_edit_disabled, theme)
-                tvRename.setTextColor(resources.getColor(R.color.colorDisabled, theme))
-                btnDelete.isClickable = false
-                btnDelete.background =
+                binding.tvRename.setTextColor(resources.getColor(R.color.colorDisabled, theme))
+                binding.btnDelete.isClickable = false
+                binding.btnDelete.background =
                     ResourcesCompat.getDrawable(resources, R.drawable.ic_delete_disabled2, theme)
-                tvDelete.setTextColor(resources.getColor(R.color.colorDisabled, theme))
+                binding.tvDelete.setTextColor(resources.getColor(R.color.colorDisabled, theme))
 
             }
 
             1 -> {
-                btnRename.isClickable = true
-                btnRename.background =
+                binding.btnRename.isClickable = true
+                binding.btnRename.background =
                     ResourcesCompat.getDrawable(resources, R.drawable.ic_edit, theme)
-                tvRename.setTextColor(resources.getColor(R.color.colorText, theme))
+                binding.tvRename.setTextColor(resources.getColor(R.color.colorText, theme))
 
-                btnDelete.isClickable = true
-                btnDelete.background =
+                binding.btnDelete.isClickable = true
+                binding.btnDelete.background =
                     ResourcesCompat.getDrawable(resources, R.drawable.ic_delete, theme)
-                tvDelete.setTextColor(resources.getColor(R.color.colorText, theme))
+                binding.tvDelete.setTextColor(resources.getColor(R.color.colorText, theme))
 
             }
 
             else -> {
-                btnRename.isClickable = false
-                btnRename.background =
+                binding.btnRename.isClickable = false
+                binding.btnRename.background =
                     ResourcesCompat.getDrawable(resources, R.drawable.ic_edit_disabled, theme)
-                tvRename.setTextColor(resources.getColor(R.color.colorDisabled, theme))
+                binding.tvRename.setTextColor(resources.getColor(R.color.colorDisabled, theme))
 
-                btnDelete.isClickable = true
-                btnDelete.background =
+                binding.btnDelete.isClickable = true
+                binding.btnDelete.background =
                     ResourcesCompat.getDrawable(resources, R.drawable.ic_delete, theme)
-                tvDelete.setTextColor(resources.getColor(R.color.colorText, theme))
+                binding.tvDelete.setTextColor(resources.getColor(R.color.colorText, theme))
 
             }
         }
@@ -224,7 +216,7 @@ class ListingActivity : AppCompatActivity(), Adapter.OnItemClickListener {
         supportActionBar?.setDisplayHomeAsUpEnabled(false)
         supportActionBar?.setDisplayShowHomeEnabled(false)
         // show relative layout
-        editorBar.visibility = View.VISIBLE
+        binding.editorBar.visibility = View.VISIBLE
 
 
     }

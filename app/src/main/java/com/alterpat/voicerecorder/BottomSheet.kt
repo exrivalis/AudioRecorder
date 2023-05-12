@@ -8,6 +8,8 @@ import android.view.ViewGroup
 import android.view.WindowManager
 import android.view.inputmethod.InputMethodManager
 import android.widget.Button
+import com.alterpat.voicerecorder.databinding.ActivityMainBinding
+import com.alterpat.voicerecorder.databinding.BottomSheetBinding
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.google.android.material.textfield.TextInputEditText
 import java.io.File
@@ -15,10 +17,7 @@ import java.io.File
 
 class BottomSheet : BottomSheetDialogFragment {
 
-    // Step 1 - This interface defines the type of messages I want to communicate to my owner
     interface OnClickListener {
-        // These methods are the different events and
-        // need to pass relevant arguments related to the event triggered
         fun onCancelClicked()
         fun onOkClicked(filePath: String, filename: String)
     }
@@ -26,6 +25,7 @@ class BottomSheet : BottomSheetDialogFragment {
     // Step 2 - This variable represents the listener passed in by the owning object
     // The listener must implement the events interface and passes messages up to the parent.
     private lateinit var listener: OnClickListener
+    private lateinit var binding: BottomSheetBinding
 
     private lateinit var filename: String
     private lateinit var dirPath: String
@@ -41,7 +41,8 @@ class BottomSheet : BottomSheetDialogFragment {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        var view = inflater.inflate(R.layout.bottom_sheet, container)
+        binding = BottomSheetBinding.inflate(layoutInflater)
+        var view = binding.root
         var editText = view.findViewById<TextInputEditText>(R.id.filenameInput)
 
 
