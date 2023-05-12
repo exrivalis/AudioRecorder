@@ -13,7 +13,7 @@ import com.google.android.material.textfield.TextInputEditText
 import java.io.File
 
 
-class BottomSheet: BottomSheetDialogFragment {
+class BottomSheet : BottomSheetDialogFragment {
 
     // Step 1 - This interface defines the type of messages I want to communicate to my owner
     interface OnClickListener {
@@ -30,7 +30,7 @@ class BottomSheet: BottomSheetDialogFragment {
     private lateinit var filename: String
     private lateinit var dirPath: String
 
-    constructor(dirPath: String, filename : String, listener: OnClickListener){
+    constructor(dirPath: String, filename: String, listener: OnClickListener) {
         this.dirPath = dirPath
         this.filename = filename
         this.listener = listener
@@ -61,9 +61,9 @@ class BottomSheet: BottomSheetDialogFragment {
 
             // update filename if need
             val updatedFilename = editText.text.toString()
-            if(updatedFilename != filename){
+            if (updatedFilename != filename) {
                 var newFile = File("$dirPath$updatedFilename.mp3")
-                File(dirPath+filename).renameTo(newFile)
+                File(dirPath + filename).renameTo(newFile)
             }
 
             // add entry to db
@@ -80,7 +80,7 @@ class BottomSheet: BottomSheetDialogFragment {
             // hide keyboard
             hideKeyboard(view)
             // delete file from storage
-            File(dirPath+filename).delete()
+            File(dirPath + filename).delete()
 
             // dismiss dialog
             dismiss()
@@ -95,7 +95,8 @@ class BottomSheet: BottomSheetDialogFragment {
 
     private fun showKeyboard(view: View) {
         if (view.requestFocus()) {
-            val imm = view.context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager?
+            val imm =
+                view.context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager?
             imm?.toggleSoftInput(InputMethodManager.SHOW_FORCED, 0)
         }
     }

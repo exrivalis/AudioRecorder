@@ -6,7 +6,6 @@ import android.text.Editable
 import android.text.TextWatcher
 import android.util.Log
 import android.view.Menu
-import android.view.MenuItem
 import android.view.View
 import android.widget.LinearLayout
 import android.widget.Toast
@@ -17,17 +16,27 @@ import androidx.room.Room
 import com.alterpat.voicerecorder.db.AppDatabase
 import com.alterpat.voicerecorder.db.AudioRecord
 import com.google.android.material.bottomsheet.BottomSheetBehavior
-import kotlinx.android.synthetic.main.activity_listing.*
+import kotlinx.android.synthetic.main.activity_listing.bottomSheet
+import kotlinx.android.synthetic.main.activity_listing.btnClose
+import kotlinx.android.synthetic.main.activity_listing.btnDelete
+import kotlinx.android.synthetic.main.activity_listing.btnRename
+import kotlinx.android.synthetic.main.activity_listing.btnSelectAll
+import kotlinx.android.synthetic.main.activity_listing.editorBar
+import kotlinx.android.synthetic.main.activity_listing.recyclerview
+import kotlinx.android.synthetic.main.activity_listing.searchInput
+import kotlinx.android.synthetic.main.activity_listing.toolbar
+import kotlinx.android.synthetic.main.activity_listing.tvDelete
+import kotlinx.android.synthetic.main.activity_listing.tvRename
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 
 
 class ListingActivity : AppCompatActivity(), Adapter.OnItemClickListener {
-    private lateinit var adapter : Adapter
-    private lateinit var audioRecords : List<AudioRecord>
-    private lateinit var db : AppDatabase
+    private lateinit var adapter: Adapter
+    private lateinit var audioRecords: List<AudioRecord>
+    private lateinit var db: AppDatabase
     private lateinit var bottomSheetBehavior: BottomSheetBehavior<LinearLayout>
-    private lateinit var menu : Menu
+    private lateinit var menu: Menu
     private var allSelected = false
     private var nbSelected = 0
 
@@ -54,13 +63,14 @@ class ListingActivity : AppCompatActivity(), Adapter.OnItemClickListener {
         db = Room.databaseBuilder(
             this,
             AppDatabase::class.java,
-            "audioRecords")
+            "audioRecords"
+        )
             //.fallbackToDestructiveMigration()
             .build()
 
         fetchAll()
 
-        searchInput.addTextChangedListener(object : TextWatcher{
+        searchInput.addTextChangedListener(object : TextWatcher {
             override fun afterTextChanged(p0: Editable?) {}
 
             override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {}
@@ -91,11 +101,11 @@ class ListingActivity : AppCompatActivity(), Adapter.OnItemClickListener {
 
         btnDelete.setOnClickListener {
             closeEditor()
-            var toDelete : List<AudioRecord> = audioRecords.filter { it.isChecked }
+            var toDelete: List<AudioRecord> = audioRecords.filter { it.isChecked }
             audioRecords = audioRecords.filter { !it.isChecked }
             GlobalScope.launch {
                 db.audioRecordDAO().delete(toDelete)
-                if(audioRecords.isEmpty())
+                if (audioRecords.isEmpty())
                     fetchAll()
                 else
                     adapter.setData(audioRecords)
@@ -108,7 +118,7 @@ class ListingActivity : AppCompatActivity(), Adapter.OnItemClickListener {
 
     }
 
-    private fun closeEditor(){
+    private fun closeEditor() {
         allSelected = false
         adapter.setEditMode(false)
         bottomSheetBehavior.state = BottomSheetBehavior.STATE_HIDDEN
@@ -121,50 +131,58 @@ class ListingActivity : AppCompatActivity(), Adapter.OnItemClickListener {
         nbSelected = 0
     }
 
-    private fun fetchAll(){
+    private fun fetchAll() {
         GlobalScope.launch {
             audioRecords = db.audioRecordDAO().getAll()
             adapter.setData(audioRecords)
         }
     }
 
-    private fun searchDatabase(query: String){
+    private fun searchDatabase(query: String) {
         GlobalScope.launch {
             audioRecords = db.audioRecordDAO().searchDatabase(query)
-            runOnUiThread{
+            runOnUiThread {
                 adapter.setData(audioRecords)
             }
         }
     }
 
-    private fun updateBottomSheet(){
-        when(nbSelected){
+    private fun updateBottomSheet() {
+        when (nbSelected) {
             0 -> {
                 btnRename.isClickable = false
-                btnRename.background = ResourcesCompat.getDrawable(resources, R.drawable.ic_edit_disabled, theme)
+                btnRename.background =
+                    ResourcesCompat.getDrawable(resources, R.drawable.ic_edit_disabled, theme)
                 tvRename.setTextColor(resources.getColor(R.color.colorDisabled, theme))
                 btnDelete.isClickable = false
-                btnDelete.background = ResourcesCompat.getDrawable(resources, R.drawable.ic_delete_disabled2, theme)
+                btnDelete.background =
+                    ResourcesCompat.getDrawable(resources, R.drawable.ic_delete_disabled2, theme)
                 tvDelete.setTextColor(resources.getColor(R.color.colorDisabled, theme))
 
             }
+
             1 -> {
                 btnRename.isClickable = true
-                btnRename.background = ResourcesCompat.getDrawable(resources, R.drawable.ic_edit, theme)
+                btnRename.background =
+                    ResourcesCompat.getDrawable(resources, R.drawable.ic_edit, theme)
                 tvRename.setTextColor(resources.getColor(R.color.colorText, theme))
 
                 btnDelete.isClickable = true
-                btnDelete.background = ResourcesCompat.getDrawable(resources, R.drawable.ic_delete, theme)
+                btnDelete.background =
+                    ResourcesCompat.getDrawable(resources, R.drawable.ic_delete, theme)
                 tvDelete.setTextColor(resources.getColor(R.color.colorText, theme))
 
             }
+
             else -> {
                 btnRename.isClickable = false
-                btnRename.background = ResourcesCompat.getDrawable(resources, R.drawable.ic_edit_disabled, theme)
+                btnRename.background =
+                    ResourcesCompat.getDrawable(resources, R.drawable.ic_edit_disabled, theme)
                 tvRename.setTextColor(resources.getColor(R.color.colorDisabled, theme))
 
                 btnDelete.isClickable = true
-                btnDelete.background = ResourcesCompat.getDrawable(resources, R.drawable.ic_delete, theme)
+                btnDelete.background =
+                    ResourcesCompat.getDrawable(resources, R.drawable.ic_delete, theme)
                 tvDelete.setTextColor(resources.getColor(R.color.colorText, theme))
 
             }
@@ -175,15 +193,15 @@ class ListingActivity : AppCompatActivity(), Adapter.OnItemClickListener {
         var intent = Intent(this, PlayerActivity::class.java)
         var audioRecord = audioRecords[position]
 
-        if(adapter.isEditMode()){
+        if (adapter.isEditMode()) {
             Log.d("ITEMCHANGE", audioRecord.isChecked.toString())
             audioRecord.isChecked = !audioRecord.isChecked
             adapter.notifyItemChanged(position)
 
-            nbSelected = if (audioRecord.isChecked) nbSelected+1 else nbSelected-1
+            nbSelected = if (audioRecord.isChecked) nbSelected + 1 else nbSelected - 1
             updateBottomSheet()
 
-        }else{
+        } else {
             intent.putExtra("filepath", audioRecord.filePath)
             intent.putExtra("filename", audioRecord.filename)
             startActivity(intent)
@@ -199,7 +217,7 @@ class ListingActivity : AppCompatActivity(), Adapter.OnItemClickListener {
 
         audioRecord.isChecked = !audioRecord.isChecked
 
-        nbSelected = if (audioRecord.isChecked) nbSelected+1 else nbSelected-1
+        nbSelected = if (audioRecord.isChecked) nbSelected + 1 else nbSelected - 1
         updateBottomSheet()
 
         // hide back button

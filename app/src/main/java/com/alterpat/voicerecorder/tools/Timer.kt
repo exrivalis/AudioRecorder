@@ -1,30 +1,30 @@
 package com.alterpat.voicerecorder.tools
 
-import java.util.*
 import java.util.Timer
+import java.util.TimerTask
 
 class Timer(private var listener: OnTimerUpdateListener) {
 
-    interface OnTimerUpdateListener{
+    interface OnTimerUpdateListener {
         fun onTimerUpdate(duration: String)
     }
 
-    private var duration : Long = 0
-    private var period : Long = 258
-    private lateinit var timer : Timer
+    private var duration: Long = 0
+    private var period: Long = 258
+    private lateinit var timer: Timer
 
-    fun start(){
+    fun start() {
         timer = Timer()
-        timer.scheduleAtFixedRate(object : TimerTask(){
+        timer.scheduleAtFixedRate(object : TimerTask() {
             override fun run() {
                 duration += period
                 listener.onTimerUpdate(format())
             }
-        },period, period)
+        }, period, period)
     }
 
 
-    fun pause(){
+    fun pause() {
         timer.cancel()
     }
 
@@ -34,19 +34,21 @@ class Timer(private var listener: OnTimerUpdateListener) {
         timer.purge()
     }
 
-    fun getDuration(): Long{return duration}
+    fun getDuration(): Long {
+        return duration
+    }
 
-    fun format(): String{
+    fun format(): String {
         val milli = duration % 1000
-        val seconds = (duration / 1000)  % 60
+        val seconds = (duration / 1000) % 60
         val minutes = (duration / (1000 * 60) % 60)
         val hours = (duration / (1000 * 60 * 60) % 24)
 
-        var formatted : String
-        formatted = if(hours > 0)
-            "%02d:%02d:%02d.%02d".format(hours, minutes, seconds, milli/10)
+        var formatted: String
+        formatted = if (hours > 0)
+            "%02d:%02d:%02d.%02d".format(hours, minutes, seconds, milli / 10)
         else
-            "%02d:%02d.%02d".format(minutes, seconds, milli/10)
+            "%02d:%02d.%02d".format(minutes, seconds, milli / 10)
 
         return formatted
     }

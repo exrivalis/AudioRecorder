@@ -16,14 +16,18 @@ import androidx.room.Room
 import com.alterpat.voicerecorder.db.AppDatabase
 import com.alterpat.voicerecorder.db.AudioRecord
 import com.alterpat.voicerecorder.tools.Timer
-import kotlinx.android.synthetic.main.activity_main.*
+import kotlinx.android.synthetic.main.activity_main.deleteBtn
+import kotlinx.android.synthetic.main.activity_main.doneBtn
+import kotlinx.android.synthetic.main.activity_main.listBtn
+import kotlinx.android.synthetic.main.activity_main.playerView
+import kotlinx.android.synthetic.main.activity_main.recordBtn
+import kotlinx.android.synthetic.main.activity_main.timerView
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import java.io.File
 import java.io.IOException
-import java.lang.Exception
 import java.text.SimpleDateFormat
-import java.util.*
+import java.util.Date
 
 private const val LOG_TAG = "AudioRecordTest"
 private const val REQUEST_RECORD_AUDIO_PERMISSION = 200
@@ -35,7 +39,7 @@ class MainActivity : AppCompatActivity(), BottomSheet.OnClickListener, Timer.OnT
     private var recorder: MediaRecorder? = null
     private var recording = false
     private var onPause = false
-    private var refreshRate : Long = 60
+    private var refreshRate: Long = 60
     private lateinit var timer: Timer
 
     private lateinit var handler: Handler
@@ -74,7 +78,7 @@ class MainActivity : AppCompatActivity(), BottomSheet.OnClickListener, Timer.OnT
         deleteBtn.setOnClickListener {
             stopRecording()
 
-            File(dirPath+fileName).delete()
+            File(dirPath + fileName).delete()
         }
         deleteBtn.isClickable = false
     }
@@ -93,9 +97,9 @@ class MainActivity : AppCompatActivity(), BottomSheet.OnClickListener, Timer.OnT
         //if (!permissionToRecordAccepted) finish()
     }
 
-    private fun startRecording(){
+    private fun startRecording() {
 
-        if(!permissionToRecordAccepted){
+        if (!permissionToRecordAccepted) {
             ActivityCompat.requestPermissions(this, permissions, REQUEST_RECORD_AUDIO_PERMISSION)
             return
         }
@@ -126,7 +130,7 @@ class MainActivity : AppCompatActivity(), BottomSheet.OnClickListener, Timer.OnT
             setAudioEncoder(MediaRecorder.AudioEncoder.AAC)
             /** END COMMENT **/
 
-            setOutputFile(dirPath+fileName)
+            setOutputFile(dirPath + fileName)
             try {
                 prepare()
             } catch (e: IOException) {
@@ -142,8 +146,8 @@ class MainActivity : AppCompatActivity(), BottomSheet.OnClickListener, Timer.OnT
 
     }
 
-    private fun animatePlayerView(){
-        if(recording && !onPause){
+    private fun animatePlayerView() {
+        if (recording && !onPause) {
             var amp = recorder!!.maxAmplitude
             playerView.updateAmps(amp)
 
@@ -157,7 +161,7 @@ class MainActivity : AppCompatActivity(), BottomSheet.OnClickListener, Timer.OnT
         }
     }
 
-    private fun pauseRecording(){
+    private fun pauseRecording() {
         onPause = true
         recorder?.apply {
             pause()
@@ -167,7 +171,7 @@ class MainActivity : AppCompatActivity(), BottomSheet.OnClickListener, Timer.OnT
 
     }
 
-    private fun resumeRecording(){
+    private fun resumeRecording() {
         onPause = false
         recorder?.apply {
             resume()
@@ -177,7 +181,7 @@ class MainActivity : AppCompatActivity(), BottomSheet.OnClickListener, Timer.OnT
         timer.start()
     }
 
-    private fun stopRecording(){
+    private fun stopRecording() {
         recording = false
         onPause = false
         recorder?.apply {
@@ -195,17 +199,17 @@ class MainActivity : AppCompatActivity(), BottomSheet.OnClickListener, Timer.OnT
         playerView.reset()
         try {
             timer.stop()
-        }catch (e: Exception){}
+        } catch (e: Exception) {
+        }
 
         timerView.text = "00:00.00"
     }
 
-    private fun showBottomSheet(){
+    private fun showBottomSheet() {
         var bottomSheet = BottomSheet(dirPath, fileName, this)
         bottomSheet.show(supportFragmentManager, LOG_TAG)
 
     }
-
 
 
     override fun onCancelClicked() {
@@ -218,7 +222,8 @@ class MainActivity : AppCompatActivity(), BottomSheet.OnClickListener, Timer.OnT
         var db = Room.databaseBuilder(
             this,
             AppDatabase::class.java,
-            "audioRecords").build()
+            "audioRecords"
+        ).build()
 
         var duration = timer.format().split(".")[0]
         stopRecording()
@@ -230,8 +235,8 @@ class MainActivity : AppCompatActivity(), BottomSheet.OnClickListener, Timer.OnT
     }
 
     override fun onTimerUpdate(duration: String) {
-        runOnUiThread{
-            if(recording)
+        runOnUiThread {
+            if (recording)
                 timerView.text = duration
         }
     }
